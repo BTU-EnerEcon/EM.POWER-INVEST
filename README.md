@@ -27,9 +27,6 @@ Model output examples
 ![image](https://user-images.githubusercontent.com/72204893/145411111-e930062b-4e01-4517-85ad-5ac79f1a3bda.png)
 
 
-![image](https://user-images.githubusercontent.com/72204893/145411167-090e26b3-1dab-4aeb-a9e3-2dd57402600e.png)
-
-
 How to run EM.POWER-INVEST?
 ===============================
 
