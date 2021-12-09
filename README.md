@@ -46,4 +46,4 @@ Please use the following BibTeX:
 Licence
 =======
 
-Copyright text, Smaranda-Daniel-Felix-whoelse
+Authors: Daniel Scholz, Smaranda Sgarciu, Felix Müsgens
