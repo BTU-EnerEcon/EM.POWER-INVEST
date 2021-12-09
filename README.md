@@ -41,10 +41,7 @@ Citing us
 
 If you use EM.POWER-INVEST for your research, we would appreciate it if you would cite the following: [work will be made public in December]
 
-Please use the following BibTeX: ::
-
-   @article{
-   }
+Please use the following BibTeX: 
 
 Licence
 =======
