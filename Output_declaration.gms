@@ -47,7 +47,7 @@ output_country_hour(country,year,hour_all,'uranium generation (chp)')$(hour(year
 output_country_hour(country,year,hour_all,'lignite generation (chp)')$(hour(year,hour_all)) = sum(conv$(map_convfuel(conv,'lignite')), flh_chp_conv(country,conv) * chp_structure_hour(country,year,hour_all) * CAP_CONV_INSTALL.L(country,conv,year) ) * indicator_chp + EPS;
 output_country_hour(country,year,hour_all,'hardcoal generation (chp)')$(hour(year,hour_all)) = sum(conv$(map_convfuel(conv,'hardcoal')), flh_chp_conv(country,conv) * chp_structure_hour(country,year,hour_all) * CAP_CONV_INSTALL.L(country,conv,year) ) * indicator_chp + EPS;
 output_country_hour(country,year,hour_all,'gas generation (chp)')$(hour(year,hour_all)) = sum(conv$(map_convfuel(conv,'gas')), flh_chp_conv(country,conv) * chp_structure_hour(country,year,hour_all) * CAP_CONV_INSTALL.L(country,conv,year) ) * indicator_chp + EPS;
-output_country_hour(country,year,hour_all,'oil generation (chp)') = sum(conv$(map_convfuel(conv,'oil')), flh_chp_conv(country,conv) * chp_structure_hour(country,year,hour_all) * CAP_CONV_INSTALL.L(country,conv,year) ) * indicator_chp + EPS;
+output_country_hour(country,year,hour_all,'oil generation (chp)')$(hour(year,hour_all)) = sum(conv$(map_convfuel(conv,'oil')), flh_chp_conv(country,conv) * chp_structure_hour(country,year,hour_all) * CAP_CONV_INSTALL.L(country,conv,year) ) * indicator_chp + EPS;
 output_country_hour(country,year,hour_all,'bioenergy generation (chp)')$(hour(year,hour_all)) = sum(renew$(map_renewfuel(renew,'bioenergy')), flh_chp_renew(country,renew) * chp_structure_hour(country,year,hour_all) * cap_renew_install_exogen(country,renew,year) ) * indicator_chp + EPS;
 output_country_hour(country,year,hour_all,'waste generation (chp)')$(hour(year,hour_all)) = sum(renew$(map_renewfuel(renew,'waste')), flh_chp_renew(country,renew) * chp_structure_hour(country,year,hour_all) * cap_renew_install_exogen(country,renew,year) ) * indicator_chp + EPS;
 
@@ -109,11 +109,13 @@ output_country_hour(country,year,hour_all,'gas avail cap')$(hour(year,hour_all))
 ;
 output_country_hour(country,year,hour_all,'oil avail cap')$(hour(year,hour_all)) = sum(conv$(map_convfuel(conv,'oil')), availability_conv(country,conv,year,hour_all) * CAP_CONV_INSTALL.L(country,conv,year) ) + EPS;
 
-output_country_hour_conv(conv,hour_all,country,year,'GEN')$(hour(year,hour_all)) = GEN_CONV.L(country,conv,year,hour_all) + EPS;
-output_country_hour_conv(conv,hour_all,country,year,'GEN_FULL')$(hour(year,hour_all)) = GEN_CONV_FULL.L(country,conv,year,hour_all) + EPS;
-output_country_hour_conv(conv,hour_all,country,year,'GEN_MIN')$(hour(year,hour_all)) = GEN_CONV_MIN.L(country,conv,year,hour_all) + EPS;
+output_country_hour(country,year,hour_all,'netexport_border')$(hour(year,hour_all)) = netexport_border(country,year,hour_all) + EPS;
 
-output_country_hour_conv(conv,hour_all,country,year,'FUEL')$(hour(year,hour_all)) =  ((1 / efficiency_conv_avg(country,conv,year)) * GEN_CONV.L(country,conv,year,hour_all) * ( 1 - indicator_partload_country(country) )
+output_country_hour_conv(country,conv,year,hour_all,'GEN')$(hour(year,hour_all)) = GEN_CONV.L(country,conv,year,hour_all) + EPS;
+output_country_hour_conv(country,conv,year,hour_all,'GEN_FULL')$(hour(year,hour_all)) = GEN_CONV_FULL.L(country,conv,year,hour_all) + EPS;
+output_country_hour_conv(country,conv,year,hour_all,'GEN_MIN')$(hour(year,hour_all)) = GEN_CONV_MIN.L(country,conv,year,hour_all) + EPS;
+
+output_country_hour_conv(country,conv,year,hour_all,'FUEL')$(hour(year,hour_all)) =  ((1 / efficiency_conv_avg(country,conv,year)) * GEN_CONV.L(country,conv,year,hour_all) * ( 1 - indicator_partload_country(country) )
                                                                                      +
                                                                                      (1 / efficiency_conv_full(country,conv,year)) * GEN_CONV_FULL.L(country,conv,year,hour_all) * indicator_partload_country(country)
                                                                                      +
@@ -122,12 +124,12 @@ output_country_hour_conv(conv,hour_all,country,year,'FUEL')$(hour(year,hour_all)
 
 
 
-output_country_hour_conv(conv,hour_all,country,year,'CAP_RTO')$(hour(year,hour_all)) = CAP_CONV_RTO.L(country,conv,year,hour_all) + EPS;
-output_country_hour_conv(conv,hour_all,country,year,'CAP_UP')$(hour(year,hour_all)) = CAP_CONV_UP.L(country,conv,year,hour_all) + EPS;
-output_country_hour_conv(conv,hour_all,country,year,'CAP_DOWN')$(hour(year,hour_all)) = CAP_CONV_DOWN.L(country,conv,year,hour_all) + EPS;
+output_country_hour_conv(country,conv,year,hour_all,'CAP_RTO')$(hour(year,hour_all)) = CAP_CONV_RTO.L(country,conv,year,hour_all) + EPS;
+output_country_hour_conv(country,conv,year,hour_all,'CAP_UP')$(hour(year,hour_all)) = CAP_CONV_UP.L(country,conv,year,hour_all) + EPS;
+output_country_hour_conv(country,conv,year,hour_all,'CAP_DOWN')$(hour(year,hour_all)) = CAP_CONV_DOWN.L(country,conv,year,hour_all) + EPS;
 
-output_country_hour_conv(conv,hour_all,country,year,'Revenue')$(hour(year,hour_all)) = output_country_hour_conv(conv,hour_all,country,year,'Gen')*output_country_hour(country,year,hour_all,'electricity price')*(1/discount_factor(year)) + EPS;
-output_country_hour_conv(conv,hour_all,country,year,'VarCosts')$(hour(year,hour_all)) = cvar_conv_avg(country,conv,year) * GEN_CONV.L(country,conv,year,hour_all) * (1 - indicator_partload_country(country))
+output_country_hour_conv(country,conv,year,hour_all,'Revenue')$(hour(year,hour_all)) = output_country_hour_conv(country,conv,year,hour_all,'Gen')*output_country_hour(country,year,hour_all,'electricity price')*(1/discount_factor(year)) + EPS;
+output_country_hour_conv(country,conv,year,hour_all,'VarCosts')$(hour(year,hour_all)) = cvar_conv_avg(country,conv,year) * GEN_CONV.L(country,conv,year,hour_all) * (1 - indicator_partload_country(country))
                                                                                         +
                                                                                         cvar_conv_full(country,conv,year) * GEN_CONV_FULL.L(country,conv,year,hour_all) * indicator_partload_country(country)
                                                                                         +
@@ -135,9 +137,9 @@ output_country_hour_conv(conv,hour_all,country,year,'VarCosts')$(hour(year,hour_
                                                                                         +
                                                                                         cramp_conv(country,conv,year) * ( CAP_CONV_UP.L(country,conv,year,hour_all) + CAP_CONV_DOWN.L(country,conv,year,hour_all) ) * indicator_ramping_country(country) + EPS;
 
-output_country_hour_conv(conv,hour_all,country,year,'ProfitContribution')$(hour(year,hour_all)) = output_country_hour_conv(conv,hour_all,country,year,'Revenue') - output_country_hour_conv(conv,hour_all,country,year,'VarCosts') + EPS;
+output_country_hour_conv(country,conv,year,hour_all,'ProfitContribution')$(hour(year,hour_all)) = output_country_hour_conv(country,conv,year,hour_all,'Revenue') - output_country_hour_conv(country,conv,year,hour_all,'VarCosts') + EPS;
 
-output_country_hour_conv(conv,hour_all,country,year,'CAP_AVAIL')$(hour(year,hour_all)) = availability_conv(country,conv,year,hour_all) * CAP_CONV_INSTALL.L(country,conv,year) + EPS;
+output_country_hour_conv(country,conv,year,hour_all,'CAP_AVAIL')$(hour(year,hour_all)) = availability_conv(country,conv,year,hour_all) * CAP_CONV_INSTALL.L(country,conv,year) + EPS;
 
 
 *##############################################################################################################################################################
@@ -652,11 +654,11 @@ output_country_year_conv(country,conv,year,'Sub') = cap_conv_sub_old(country,con
 output_country_year_conv(country,conv,year,'Sub exogen') = max(cap_conv_sub_old(country,conv,year),0) + EPS;
 
 output_country_year_conv(country,conv,year,'Gen') = (( sum(hour_all$(hour(year,hour_all)), GEN_CONV.L(country,conv,year,hour_all)) * (8760/sum(hour(year,hour_all), 1)) )) + EPS;
-output_country_year_conv(country,conv,year,'Fuel') = (( sum(hour_all$(hour(year,hour_all)), output_country_hour_conv(conv,hour_all,country,year,'FUEL')) * (8760/sum(hour(year,hour_all), 1)) ) ) + EPS;
+output_country_year_conv(country,conv,year,'Fuel') = (( sum(hour_all$(hour(year,hour_all)), output_country_hour_conv(country,conv,year,hour_all,'FUEL')) * (8760/sum(hour(year,hour_all), 1)) ) ) + EPS;
 
-output_country_year_conv(country,conv,year,'Revenue') = (( sum(hour_all$(hour(year,hour_all)), output_country_hour_conv(conv,hour_all,country,year,'Revenue')) * (8760/sum(hour(year,hour_all), 1)) ) ) + EPS;
-output_country_year_conv(country,conv,year,'VarCosts') = (( sum(hour_all$(hour(year,hour_all)), output_country_hour_conv(conv,hour_all,country,year,'VarCosts')) * (8760/sum(hour(year,hour_all), 1)) ) ) + EPS;
-output_country_year_conv(country,conv,year,'ProfitContribution') = (( sum(hour_all$(hour(year,hour_all)), output_country_hour_conv(conv,hour_all,country,year,'ProfitContribution')) * (8760/sum(hour(year,hour_all), 1)) ) ) + EPS;
+output_country_year_conv(country,conv,year,'Revenue') = (( sum(hour_all$(hour(year,hour_all)), output_country_hour_conv(country,conv,year,hour_all,'Revenue')) * (8760/sum(hour(year,hour_all), 1)) ) ) + EPS;
+output_country_year_conv(country,conv,year,'VarCosts') = (( sum(hour_all$(hour(year,hour_all)), output_country_hour_conv(country,conv,year,hour_all,'VarCosts')) * (8760/sum(hour(year,hour_all), 1)) ) ) + EPS;
+output_country_year_conv(country,conv,year,'ProfitContribution') = (( sum(hour_all$(hour(year,hour_all)), output_country_hour_conv(country,conv,year,hour_all,'ProfitContribution')) * (8760/sum(hour(year,hour_all), 1)) ) ) + EPS;
 output_country_year_conv(country,conv,year,'MarketValue') = (output_country_year_conv(country,conv,year,'Revenue') / output_country_year_conv(country,conv,year,'Gen'))$(output_country_year_conv(country,conv,year,'Gen') gt 0) + EPS;
 
 output_country_year_conv(country,conv,year,'Investment costs') = sum(year2$( ( yearnumber(year) ge yearnumber(year2) ) AND ( yearnumber(year) le (yearnumber(year2) + inputdata_conv(conv,'lifetime_tech')) ) AND ( yearnumber(year2) ge convyear_lo(conv) ) AND ( yearnumber(year2) le convyear_up(conv) ) ),
@@ -672,8 +674,7 @@ output_country_year_conv(country,conv,year,'cvar_min') = cvar_conv_min(country,c
 output_country_year_conv(country,conv,year,'eff_full') = efficiency_conv_full(country,conv,year) + EPS;
 output_country_year_conv(country,conv,year,'eff_min') = efficiency_conv_min(country,conv,year) + EPS;
 
-output_country_year_conv(country,conv,year,'SHARE_FULL') = ( sum(hour_all$(hour(year,hour_all)), output_country_hour_conv(conv,hour_all,country,year,'GEN_FULL')) / sum(hour_all$(hour(year,hour_all)), output_country_hour_conv(conv,hour_all,country,year,'GEN')) )$(output_country_year_conv(country,conv,year,'Gen') gt 0) + EPS;
-
+output_country_year_conv(country,conv,year,'SHARE_FULL') = ( sum(hour_all$(hour(year,hour_all)), output_country_hour_conv(country,conv,year,hour_all,'GEN_FULL')) / sum(hour_all$(hour(year,hour_all)), output_country_hour_conv(country,conv,year,hour_all,'GEN')) )$(output_country_year_conv(country,conv,year,'Gen') gt 0) + EPS;
 
 output_country_conv(country,conv,'ProfitContribution') = sum(year, money_weighting_factor(year) * output_country_year_conv(country,conv,year,'ProfitContribution')) + EPS;
 output_country_conv(country,conv,'Investment costs') = sum(year, money_weighting_factor(year) * output_country_year_conv(country,conv,year,'Investment costs')) + EPS;
@@ -693,17 +694,17 @@ output_DE_export_hour(year,hour_all,'netimport',country2)$(hour(year,hour_all) A
 output_DE_export_hour(year,hour_all,'ntc_export',country2)$(hour(year,hour_all) AND ((ntc('DE+LU',country2,year) + ntc(country2,'DE+LU',year)) gt 0)) = ntc_hour('DE+LU',country2,year,hour_all) + EPS;
 output_DE_export_hour(year,hour_all,'ntc_import',country2)$(hour(year,hour_all) AND ((ntc('DE+LU',country2,year) + ntc(country2,'DE+LU',year)) gt 0)) = ntc_hour(country2,'DE+LU',year,hour_all) + EPS;
 
-output_DE_hour_conv(conv,hour_all,year,'GEN')$(hour(year,hour_all)) = output_country_hour_conv(conv,hour_all,'DE+LU',year,'GEN') + EPS;
-output_DE_hour_conv(conv,hour_all,year,'GEN_FULL')$(hour(year,hour_all)) = output_country_hour_conv(conv,hour_all,'DE+LU',year,'GEN_FULL') + EPS;
-output_DE_hour_conv(conv,hour_all,year,'GEN_MIN')$(hour(year,hour_all)) = output_country_hour_conv(conv,hour_all,'DE+LU',year,'GEN_MIN') + EPS;
-output_DE_hour_conv(conv,hour_all,year,'FUEL')$(hour(year,hour_all)) = output_country_hour_conv(conv,hour_all,'DE+LU',year,'FUEL') + EPS;
-output_DE_hour_conv(conv,hour_all,year,'CAP_RTO')$(hour(year,hour_all)) = output_country_hour_conv(conv,hour_all,'DE+LU',year,'CAP_RTO') + EPS;
-output_DE_hour_conv(conv,hour_all,year,'CAP_UP')$(hour(year,hour_all)) = output_country_hour_conv(conv,hour_all,'DE+LU',year,'CAP_UP') + EPS;
-output_DE_hour_conv(conv,hour_all,year,'CAP_DOWN')$(hour(year,hour_all)) = output_country_hour_conv(conv,hour_all,'DE+LU',year,'CAP_DOWN') + EPS;
-output_DE_hour_conv(conv,hour_all,year,'CAP_AVAIL')$(hour(year,hour_all)) = output_country_hour_conv(conv,hour_all,'DE+LU',year,'CAP_AVAIL') + EPS;
-output_DE_hour_conv(conv,hour_all,year,'Revenue')$(hour(year,hour_all)) = output_country_hour_conv(conv,hour_all,'DE+LU',year,'Revenue') + EPS;
-output_DE_hour_conv(conv,hour_all,year,'VarCosts')$(hour(year,hour_all)) = output_country_hour_conv(conv,hour_all,'DE+LU',year,'VarCosts') + EPS;
-output_DE_hour_conv(conv,hour_all,year,'ProfitContribution')$(hour(year,hour_all)) = output_country_hour_conv(conv,hour_all,'DE+LU',year,'ProfitContribution') + EPS;
+output_DE_hour_conv(conv,hour_all,year,'GEN')$(hour(year,hour_all)) = output_country_hour_conv('DE+LU',conv,year,hour_all,'GEN') + EPS;
+output_DE_hour_conv(conv,hour_all,year,'GEN_FULL')$(hour(year,hour_all)) = output_country_hour_conv('DE+LU',conv,year,hour_all,'GEN_FULL') + EPS;
+output_DE_hour_conv(conv,hour_all,year,'GEN_MIN')$(hour(year,hour_all)) = output_country_hour_conv('DE+LU',conv,year,hour_all,'GEN_MIN') + EPS;
+output_DE_hour_conv(conv,hour_all,year,'FUEL')$(hour(year,hour_all)) = output_country_hour_conv('DE+LU',conv,year,hour_all,'FUEL') + EPS;
+output_DE_hour_conv(conv,hour_all,year,'CAP_RTO')$(hour(year,hour_all)) = output_country_hour_conv('DE+LU',conv,year,hour_all,'CAP_RTO') + EPS;
+output_DE_hour_conv(conv,hour_all,year,'CAP_UP')$(hour(year,hour_all)) = output_country_hour_conv('DE+LU',conv,year,hour_all,'CAP_UP') + EPS;
+output_DE_hour_conv(conv,hour_all,year,'CAP_DOWN')$(hour(year,hour_all)) = output_country_hour_conv('DE+LU',conv,year,hour_all,'CAP_DOWN') + EPS;
+output_DE_hour_conv(conv,hour_all,year,'CAP_AVAIL')$(hour(year,hour_all)) = output_country_hour_conv('DE+LU',conv,year,hour_all,'CAP_AVAIL') + EPS;
+output_DE_hour_conv(conv,hour_all,year,'Revenue')$(hour(year,hour_all)) = output_country_hour_conv('DE+LU',conv,year,hour_all,'Revenue') + EPS;
+output_DE_hour_conv(conv,hour_all,year,'VarCosts')$(hour(year,hour_all)) = output_country_hour_conv('DE+LU',conv,year,hour_all,'VarCosts') + EPS;
+output_DE_hour_conv(conv,hour_all,year,'ProfitContribution')$(hour(year,hour_all)) = output_country_hour_conv('DE+LU',conv,year,hour_all,'ProfitContribution') + EPS;
 
 output_DE_year(year,output_country_year_set) = output_country_year('DE+LU',year,output_country_year_set) + EPS;
 output_DE_export_year(year,'export',country2)$(ntc('DE+LU',country2,year) gt 0) = (( sum(hour_all$(hour(year,hour_all)), output_DE_export_hour(year,hour_all,'export',country2)) * (8760/sum(hour(year,hour_all), 1)) ) / 1000) + EPS;
@@ -712,7 +713,6 @@ output_DE_export_year(year,'netimport',country2)$((ntc('DE+LU',country2,year) + 
 output_DE_export_year(year,'ntc_export',country2)$(ntc('DE+LU',country2,year) gt 0) = ntc('DE+LU',country2,year) + EPS;
 output_DE_export_year(year,'ntc_import',country2)$(ntc(country2,'DE+LU',year) gt 0) = ntc(country2,'DE+LU',year) + EPS;
 output_DE_year_conv(year,conv,output_country_year_conv_set) = output_country_year_conv('DE+LU',conv,year,output_country_year_conv_set) + EPS;
-
 
 output_AT_hour(year,hour_all,output_country_hour_set)$(hour(year,hour_all)) = output_country_hour('AT',year,hour_all,output_country_hour_set) + EPS;
 output_AT_export_hour(year,hour_all,'export',country2)$(hour(year,hour_all) AND (ntc('AT',country2,year) gt 0)) = FLOW.L('AT',country2,year,hour_all) + EPS;
@@ -840,20 +840,6 @@ output_FR_export_year(year,'netimport',country2)$((ntc('FR',country2,year) + ntc
 output_FR_export_year(year,'ntc_export',country2)$(ntc('FR',country2,year) gt 0) = ntc('FR',country2,year) + EPS;
 output_FR_export_year(year,'ntc_import',country2)$(ntc(country2,'FR',year) gt 0) = ntc(country2,'FR',year) + EPS;
 
-output_GB_hour(year,hour_all,output_country_hour_set)$(hour(year,hour_all)) = output_country_hour('UK(GB)',year,hour_all,output_country_hour_set) + EPS;
-output_GB_export_hour(year,hour_all,'export',country2)$(hour(year,hour_all) AND (ntc('UK(GB)',country2,year) gt 0)) = FLOW.L('UK(GB)',country2,year,hour_all) + EPS;
-output_GB_export_hour(year,hour_all,'import',country2)$(hour(year,hour_all) AND (ntc(country2,'UK(GB)',year) gt 0)) = FLOW.L(country2,'UK(GB)',year,hour_all) + EPS;
-output_GB_export_hour(year,hour_all,'netimport',country2)$(hour(year,hour_all) AND ((ntc('UK(GB)',country2,year) + ntc(country2,'UK(GB)',year)) gt 0)) = output_GB_export_hour(year,hour_all,'import',country2) - output_GB_export_hour(year,hour_all,'export',country2) + EPS;
-output_GB_export_hour(year,hour_all,'ntc_export',country2)$(hour(year,hour_all) AND ((ntc('UK(GB)',country2,year) + ntc(country2,'UK(GB)',year)) gt 0)) = ntc_hour('UK(GB)',country2,year,hour_all) + EPS;
-output_GB_export_hour(year,hour_all,'ntc_import',country2)$(hour(year,hour_all) AND ((ntc('UK(GB)',country2,year) + ntc(country2,'UK(GB)',year)) gt 0)) = ntc_hour(country2,'UK(GB)',year,hour_all) + EPS;
-
-output_GB_year(year,output_country_year_set) = output_country_year('UK(GB)',year,output_country_year_set) + EPS;
-output_GB_export_year(year,'export',country2)$(ntc('UK(GB)',country2,year) gt 0) = (( sum(hour_all$(hour(year,hour_all)), output_GB_export_hour(year,hour_all,'export',country2)) * (8760/sum(hour(year,hour_all), 1)) ) / 1000) + EPS;
-output_GB_export_year(year,'import',country2)$(ntc(country2,'UK(GB)',year) gt 0) = (( sum(hour_all$(hour(year,hour_all)), output_GB_export_hour(year,hour_all,'import',country2)) * (8760/sum(hour(year,hour_all), 1)) ) / 1000) + EPS;
-output_GB_export_year(year,'netimport',country2)$((ntc('UK(GB)',country2,year) + ntc(country2,'UK(GB)',year)) gt 0) = output_GB_export_year(year,'import',country2) - output_GB_export_year(year,'export',country2) + EPS;
-output_GB_export_year(year,'ntc_export',country2)$(ntc('UK(GB)',country2,year) gt 0) = ntc('UK(GB)',country2,year) + EPS;
-output_GB_export_year(year,'ntc_import',country2)$(ntc(country2,'UK(GB)',year) gt 0) = ntc(country2,'UK(GB)',year) + EPS;
-
 output_GR_hour(year,hour_all,output_country_hour_set)$(hour(year,hour_all)) = output_country_hour('GR',year,hour_all,output_country_hour_set) + EPS;
 output_GR_export_hour(year,hour_all,'export',country2)$(hour(year,hour_all) AND (ntc('GR',country2,year) gt 0)) = FLOW.L('GR',country2,year,hour_all) + EPS;
 output_GR_export_hour(year,hour_all,'import',country2)$(hour(year,hour_all) AND (ntc(country2,'GR',year) gt 0)) = FLOW.L(country2,'GR',year,hour_all) + EPS;
@@ -910,19 +896,19 @@ output_IBER_export_year(year,'netimport',country2)$((ntc('ES+PT',country2,year) 
 output_IBER_export_year(year,'ntc_export',country2)$(ntc('ES+PT',country2,year) gt 0) = ntc('ES+PT',country2,year) + EPS;
 output_IBER_export_year(year,'ntc_import',country2)$(ntc(country2,'ES+PT',year) gt 0) = ntc(country2,'ES+PT',year) + EPS;
 
-output_IRIS_hour(year,hour_all,output_country_hour_set)$(hour(year,hour_all)) = output_country_hour('IE+UK(NIE)',year,hour_all,output_country_hour_set) + EPS;
-output_IRIS_export_hour(year,hour_all,'export',country2)$(hour(year,hour_all) AND (ntc('IE+UK(NIE)',country2,year) gt 0)) = FLOW.L('IE+UK(NIE)',country2,year,hour_all) + EPS;
-output_IRIS_export_hour(year,hour_all,'import',country2)$(hour(year,hour_all) AND (ntc(country2,'IE+UK(NIE)',year) gt 0)) = FLOW.L(country2,'IE+UK(NIE)',year,hour_all) + EPS;
-output_IRIS_export_hour(year,hour_all,'netimport',country2)$(hour(year,hour_all) AND ((ntc('IE+UK(NIE)',country2,year) + ntc(country2,'IE+UK(NIE)',year)) gt 0)) = output_IRIS_export_hour(year,hour_all,'import',country2) - output_IRIS_export_hour(year,hour_all,'export',country2) + EPS;
-output_IRIS_export_hour(year,hour_all,'ntc_export',country2)$(hour(year,hour_all) AND ((ntc('IE+UK(NIE)',country2,year) + ntc(country2,'IE+UK(NIE)',year)) gt 0)) = ntc_hour('IE+UK(NIE)',country2,year,hour_all) + EPS;
-output_IRIS_export_hour(year,hour_all,'ntc_import',country2)$(hour(year,hour_all) AND ((ntc('IE+UK(NIE)',country2,year) + ntc(country2,'IE+UK(NIE)',year)) gt 0)) = ntc_hour(country2,'IE+UK(NIE)',year,hour_all) + EPS;
+output_IE_hour(year,hour_all,output_country_hour_set)$(hour(year,hour_all)) = output_country_hour('IE',year,hour_all,output_country_hour_set) + EPS;
+output_IE_export_hour(year,hour_all,'export',country2)$(hour(year,hour_all) AND (ntc('IE',country2,year) gt 0)) = FLOW.L('IE',country2,year,hour_all) + EPS;
+output_IE_export_hour(year,hour_all,'import',country2)$(hour(year,hour_all) AND (ntc(country2,'IE',year) gt 0)) = FLOW.L(country2,'IE',year,hour_all) + EPS;
+output_IE_export_hour(year,hour_all,'netimport',country2)$(hour(year,hour_all) AND ((ntc('IE',country2,year) + ntc(country2,'IE',year)) gt 0)) = output_IE_export_hour(year,hour_all,'import',country2) - output_IE_export_hour(year,hour_all,'export',country2) + EPS;
+output_IE_export_hour(year,hour_all,'ntc_export',country2)$(hour(year,hour_all) AND ((ntc('IE',country2,year) + ntc(country2,'IE',year)) gt 0)) = ntc_hour('IE',country2,year,hour_all) + EPS;
+output_IE_export_hour(year,hour_all,'ntc_import',country2)$(hour(year,hour_all) AND ((ntc('IE',country2,year) + ntc(country2,'IE',year)) gt 0)) = ntc_hour(country2,'IE',year,hour_all) + EPS;
 
-output_IRIS_year(year,output_country_year_set) = output_country_year('IE+UK(NIE)',year,output_country_year_set) + EPS;
-output_IRIS_export_year(year,'export',country2)$(ntc('IE+UK(NIE)',country2,year) gt 0) = (( sum(hour_all$(hour(year,hour_all)), output_IRIS_export_hour(year,hour_all,'export',country2)) * (8760/sum(hour(year,hour_all), 1)) ) / 1000) + EPS;
-output_IRIS_export_year(year,'import',country2)$(ntc(country2,'IE+UK(NIE)',year) gt 0) = (( sum(hour_all$(hour(year,hour_all)), output_IRIS_export_hour(year,hour_all,'import',country2)) * (8760/sum(hour(year,hour_all), 1)) ) / 1000) + EPS;
-output_IRIS_export_year(year,'netimport',country2)$((ntc('IE+UK(NIE)',country2,year) + ntc(country2,'IE+UK(NIE)',year)) gt 0) = output_IRIS_export_year(year,'import',country2) - output_IRIS_export_year(year,'export',country2) + EPS;
-output_IRIS_export_year(year,'ntc_export',country2)$(ntc('IE+UK(NIE)',country2,year) gt 0) = ntc('IE+UK(NIE)',country2,year) + EPS;
-output_IRIS_export_year(year,'ntc_import',country2)$(ntc(country2,'IE+UK(NIE)',year) gt 0) = ntc(country2,'IE+UK(NIE)',year) + EPS;
+output_IE_year(year,output_country_year_set) = output_country_year('IE',year,output_country_year_set) + EPS;
+output_IE_export_year(year,'export',country2)$(ntc('IE',country2,year) gt 0) = (( sum(hour_all$(hour(year,hour_all)), output_IE_export_hour(year,hour_all,'export',country2)) * (8760/sum(hour(year,hour_all), 1)) ) / 1000) + EPS;
+output_IE_export_year(year,'import',country2)$(ntc(country2,'IE',year) gt 0) = (( sum(hour_all$(hour(year,hour_all)), output_IE_export_hour(year,hour_all,'import',country2)) * (8760/sum(hour(year,hour_all), 1)) ) / 1000) + EPS;
+output_IE_export_year(year,'netimport',country2)$((ntc('IE',country2,year) + ntc(country2,'IE',year)) gt 0) = output_IE_export_year(year,'import',country2) - output_IE_export_year(year,'export',country2) + EPS;
+output_IE_export_year(year,'ntc_export',country2)$(ntc('IE',country2,year) gt 0) = ntc('IE',country2,year) + EPS;
+output_IE_export_year(year,'ntc_import',country2)$(ntc(country2,'IE',year) gt 0) = ntc(country2,'IE',year) + EPS;
 
 output_IT_hour(year,hour_all,output_country_hour_set)$(hour(year,hour_all)) = output_country_hour('IT',year,hour_all,output_country_hour_set) + EPS;
 output_IT_export_hour(year,hour_all,'export',country2)$(hour(year,hour_all) AND (ntc('IT',country2,year) gt 0)) = FLOW.L('IT',country2,year,hour_all) + EPS;
@@ -1050,14 +1036,16 @@ output_SK_export_year(year,'netimport',country2)$((ntc('SK',country2,year) + ntc
 output_SK_export_year(year,'ntc_export',country2)$(ntc('SK',country2,year) gt 0) = ntc('SK',country2,year) + EPS;
 output_SK_export_year(year,'ntc_import',country2)$(ntc(country2,'SK',year) gt 0) = ntc(country2,'SK',year) + EPS;
 
-output_nuclear_hour(year,hour_all,country,'Generation')$(hour(year,hour_all)) = GEN_CONV.L(country,'nuclear_new',year,hour_all) + EPS;
-output_nuclear_hour(year,hour_all,country,'Price')$(hour(year,hour_all)) = output_country_hour(country,year,hour_all,'electricity price') + EPS;
-output_nuclear_hour(year,hour_all,country,'Revenue')$(hour(year,hour_all)) = output_nuclear_hour(year,hour_all,country,'price') * output_nuclear_hour(year,hour_all,country,'generation') + EPS;
-output_nuclear_hour(year,hour_all,country,'Cost')$(hour(year,hour_all)) = cvar_conv_avg(country,'nuclear_new',year) * GEN_CONV.L(country,'nuclear_new',year,hour_all) * (1 - indicator_partload_country(country))
-                                           +
-                                           cvar_conv_full(country,'nuclear_new',year) * GEN_CONV_FULL.L(country,'nuclear_new',year,hour_all) * indicator_partload_country(country)
-                                           +
-                                           cvar_conv_min(country,'nuclear_new',year) * GEN_CONV_MIN.L(country,'nuclear_new',year,hour_all) * indicator_partload_country(country)
-                                           +
-                                           cramp_conv(country,'nuclear_new',year) * ( CAP_CONV_UP.L(country,'nuclear_new',year,hour_all) + CAP_CONV_DOWN.L(country,'nuclear_new',year,hour_all) ) * indicator_ramping_country(country) + EPS;
-output_nuclear_hour(year,hour_all,country,'ProfitContribution')$(hour(year,hour_all)) = output_nuclear_hour(year,hour_all,country,'Revenue') - output_nuclear_hour(year,hour_all,country,'Cost') + EPS;
+output_UK_hour(year,hour_all,output_country_hour_set)$(hour(year,hour_all)) = output_country_hour('UK',year,hour_all,output_country_hour_set) + EPS;
+output_UK_export_hour(year,hour_all,'export',country2)$(hour(year,hour_all) AND (ntc('UK',country2,year) gt 0)) = FLOW.L('UK',country2,year,hour_all) + EPS;
+output_UK_export_hour(year,hour_all,'import',country2)$(hour(year,hour_all) AND (ntc(country2,'UK',year) gt 0)) = FLOW.L(country2,'UK',year,hour_all) + EPS;
+output_UK_export_hour(year,hour_all,'netimport',country2)$(hour(year,hour_all) AND ((ntc('UK',country2,year) + ntc(country2,'UK',year)) gt 0)) = output_UK_export_hour(year,hour_all,'import',country2) - output_UK_export_hour(year,hour_all,'export',country2) + EPS;
+output_UK_export_hour(year,hour_all,'ntc_export',country2)$(hour(year,hour_all) AND ((ntc('UK',country2,year) + ntc(country2,'UK',year)) gt 0)) = ntc_hour('UK',country2,year,hour_all) + EPS;
+output_UK_export_hour(year,hour_all,'ntc_import',country2)$(hour(year,hour_all) AND ((ntc('UK',country2,year) + ntc(country2,'UK',year)) gt 0)) = ntc_hour(country2,'UK',year,hour_all) + EPS;
+
+output_UK_year(year,output_country_year_set) = output_country_year('UK',year,output_country_year_set) + EPS;
+output_UK_export_year(year,'export',country2)$(ntc('UK',country2,year) gt 0) = (( sum(hour_all$(hour(year,hour_all)), output_UK_export_hour(year,hour_all,'export',country2)) * (8760/sum(hour(year,hour_all), 1)) ) / 1000) + EPS;
+output_UK_export_year(year,'import',country2)$(ntc(country2,'UK',year) gt 0) = (( sum(hour_all$(hour(year,hour_all)), output_UK_export_hour(year,hour_all,'import',country2)) * (8760/sum(hour(year,hour_all), 1)) ) / 1000) + EPS;
+output_UK_export_year(year,'netimport',country2)$((ntc('UK',country2,year) + ntc(country2,'UK',year)) gt 0) = output_UK_export_year(year,'import',country2) - output_UK_export_year(year,'export',country2) + EPS;
+output_UK_export_year(year,'ntc_export',country2)$(ntc('UK',country2,year) gt 0) = ntc('UK',country2,year) + EPS;
+output_UK_export_year(year,'ntc_import',country2)$(ntc(country2,'UK',year) gt 0) = ntc(country2,'UK',year) + EPS;

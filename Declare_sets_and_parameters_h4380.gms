@@ -124,17 +124,19 @@ ntc_hour(country,country2,'2050',hour_all)$(hour('2040',hour_all)) = ntc(country
 ntc_hour(country,country2,'2045',hour_all)$(hour('2040',hour_all)) = ntc(country,country2,'2045') * ( ntc_hour(country,country2,'2040',hour_all) / ntc(country,country2,'2040') );
 *Display ntc_hour;
 
-netexport_border(country,year,hour_all)$(hour(year,hour_all)) = borderflow(year,hour_all,country);
-netexport_border(country,'2022',hour_all)$(hour('2020',hour_all)) = borderflow('2020',hour_all,country);
-netexport_border(country,'2024',hour_all)$(hour('2025',hour_all)) = borderflow('2025',hour_all,country);
-netexport_border(country,'2026',hour_all)$(hour('2025',hour_all)) = borderflow('2025',hour_all,country);
-netexport_border(country,'2028',hour_all)$(hour('2030',hour_all)) = borderflow('2030',hour_all,country);
-netexport_border(country,'2032',hour_all)$(hour('2030',hour_all)) = borderflow('2030',hour_all,country);
-netexport_border(country,'2034',hour_all)$(hour('2030',hour_all)) = borderflow('2030',hour_all,country);
-netexport_border(country,'2036',hour_all)$(hour('2030',hour_all)) = borderflow('2030',hour_all,country);
-netexport_border(country,'2038',hour_all)$(hour('2040',hour_all)) = borderflow('2040',hour_all,country);
-netexport_border(country,'2050',hour_all)$(hour('2040',hour_all)) = borderflow('2040',hour_all,country);
-netexport_border(country,'2045',hour_all)$(hour('2040',hour_all)) = borderflow('2040',hour_all,country);
+netexport_border(country,'2020',hour_all)$(hour('2020',hour_all)) = borderflow('2017',hour_all,country);
+netexport_border(country,'2022',hour_all)$(hour('2020',hour_all)) = borderflow('2017',hour_all,country);
+netexport_border(country,'2024',hour_all)$(hour('2025',hour_all)) = borderflow('2017',hour_all,country);
+netexport_border(country,'2026',hour_all)$(hour('2025',hour_all)) = borderflow('2017',hour_all,country);
+netexport_border(country,'2028',hour_all)$(hour('2030',hour_all)) = borderflow('2017',hour_all,country);
+netexport_border(country,'2030',hour_all)$(hour('2030',hour_all)) = borderflow('2017',hour_all,country);
+netexport_border(country,'2032',hour_all)$(hour('2030',hour_all)) = borderflow('2017',hour_all,country);
+netexport_border(country,'2034',hour_all)$(hour('2030',hour_all)) = borderflow('2017',hour_all,country);
+netexport_border(country,'2036',hour_all)$(hour('2030',hour_all)) = borderflow('2017',hour_all,country);
+netexport_border(country,'2038',hour_all)$(hour('2040',hour_all)) = borderflow('2017',hour_all,country);
+netexport_border(country,'2040',hour_all)$(hour('2040',hour_all)) = borderflow('2017',hour_all,country);
+netexport_border(country,'2045',hour_all)$(hour('2040',hour_all)) = borderflow('2017',hour_all,country);
+netexport_border(country,'2050',hour_all)$(hour('2040',hour_all)) = borderflow('2017',hour_all,country);
 *Display borderflow,netexport_border;
 
 
@@ -240,7 +242,7 @@ cap_renew_install_exogen(country,'runofriver',year) = cap_renew_install_exogen2(
 *Calibration of chp data
 chp_structure_hour(country,year,hour_all)$(hour(year,hour_all)) = ( chp_structure(year,hour_all,country) * (1 - indicator_chp_trimmed) + chp_trimmed_structure(year,hour_all,country) * indicator_chp_trimmed ) / 1000 + EPS;
 
-chp_structure_hour(country,'2022',hour_all)$(hour('2020',hour_all)) =chp_structure_hour(country,'2020',hour_all);
+chp_structure_hour(country,'2022',hour_all)$(hour('2020',hour_all)) = chp_structure_hour(country,'2020',hour_all);
 chp_structure_hour(country,'2024',hour_all)$(hour('2025',hour_all)) = chp_structure_hour(country,'2025',hour_all);
 chp_structure_hour(country,'2026',hour_all)$(hour('2025',hour_all)) = chp_structure_hour(country,'2025',hour_all);
 chp_structure_hour(country,'2028',hour_all)$(hour('2030',hour_all)) = chp_structure_hour(country,'2030',hour_all);
@@ -255,81 +257,15 @@ chp_structure_hour(country,'2050',hour_all)$(hour('2040',hour_all)) = chp_struct
 *################################################################################################################################
 *Calculation of montly availability factors
 
-resload(country,year,hour_all)$(hour(year,hour_all)) = load(country,year,hour_all)
-                                                      -
-                                                      capfactor_renew_max(country,'solar',year,hour_all) * cap_renew_install_exogen(country,'solar',year)
-                                                      -
-                                                      capfactor_renew_max(country,'windonshore',year,hour_all) * cap_renew_install_exogen(country,'windonshore',year)
-                                                      -
-                                                      capfactor_renew_max(country,'windoffshore',year,hour_all) * cap_renew_install_exogen(country,'windoffshore',year)
-                                                      -
-                                                      capfactor_renew_max(country,'runofriver',year,hour_all) * cap_renew_install_exogen(country,'runofriver',year)
-                                                      -
-                                                      capfactor_renew_max(country,'geothermal',year,hour_all) * cap_renew_install_exogen(country,'geothermal',year)
-                                                      -
-                                                      capfactor_renew_max(country,'marine',year,hour_all) * cap_renew_install_exogen(country,'marine',year) + EPS
+availability_conv(country,conv,year,hour_all)$(hour(year,hour_all)) = sum(month$(map_hourmonth(year,hour_all,month)), availability_conv_planned(country,conv,year,month)) - forcedoutages_conv(country,conv,year);
+
+availability_conv(country,'nuclear_old_1900-2020','2017',hour_all)$(hour('2017',hour_all)) = ( 1 - plannedoutages_conv(country,'nuclear_old_1900-2020','2017') - forcedoutages_conv(country,'nuclear_old_1900-2020','2017') ) * sum(month$(map_hourmonth('2017',hour_all,month)), avail_month_structure_nuclear('2017',month,country))$( sum(month, avail_month_structure_nuclear('2017',month,country)) gt 0)
+                                                                                           +
+                                                                                           ( sum(month$(map_hourmonth('2017',hour_all,month)), availability_conv_planned(country,'nuclear_old_1900-2020','2017',month)) - forcedoutages_conv(country,'nuclear_old_1900-2020','2017') )$( sum(month, avail_month_structure_nuclear('2017',month,country)) eq 0)
 ;
+*Display availability_conv;
 
-max_monthlyload(year,month,country) = smax(hour_all$(hour(year,hour_all) AND map_hourmonth(year,hour_all,month)), load(country,year,hour_all)) + EPS;
-max_monthlyresload(year,month,country) = smax(hour_all$(hour(year,hour_all) AND map_hourmonth(year,hour_all,month)), resload(country,year,hour_all)) + EPS;
-
-
-sum_max_monthlyload(year,country) = sum(month, max_monthlyload(year,month,country)) + EPS;
-sum_max_monthlyresload(year,country) = sum(month, max_monthlyresload(year,month,country)) + EPS;
-
-avail_month_structure_load(year,month,country) = (max_monthlyload(year,month,country) /  sum_max_monthlyload(year,country)) * 12 + EPS;
-avail_month_structure_resload(year,month,country) = (max_monthlyresload(year,month,country) /  sum_max_monthlyresload(year,country)) * 12 + EPS;
-
-*Display max_monthlyload,max_monthlyresload,avail_month_structure_load,avail_month_structure_resload;
-
-avail_month_structure_load(year,month,country) = min(avail_month_structure_load(year,month,country), 1/0.85) + EPS;
-avail_month_structure_resload(year,month,country) = min(avail_month_structure_resload(year,month,country), 1/0.85) + EPS;
-
-sum_avail_month_structure_load(year,country) = sum(month, avail_month_structure_load(year,month,country)) + EPS;
-sum_avail_month_structure_resload(year,country) = sum(month, avail_month_structure_resload(year,month,country)) + EPS;
-*Display avail_month_structure_load,avail_month_structure_resload,sum_avail_month_structure_load,sum_avail_month_structure_resload;
-
-Loop((year,country),
-   counter = 0;
-   Loop(month$(avail_month_structure_load(year,month,country) gt 1.15),
-         counter = counter + 1;
-   );
-   number_over_threshold_load(year,country) = counter;
-
-   counter = 0;
-   Loop(month$(avail_month_structure_resload(year,month,country) gt 1.15),
-         counter = counter + 1;
-   );
-   number_over_threshold_resload(year,country) = counter;
-);
-
-correction_factor_load(year,country) = (( 12 - sum_avail_month_structure_load(year,country) ) / ( 12 - number_over_threshold_load(year,country) ))$(number_over_threshold_load(year,country) gt 0) + EPS;
-correction_factor_resload(year,country) = (( 12 - sum_avail_month_structure_resload(year,country) ) / ( 12 - number_over_threshold_resload(year,country) ))$(number_over_threshold_resload(year,country) gt 0) + EPS;
-*Display number_over_threshold_load,number_over_threshold_resload,correction_factor_load,correction_factor_resload;
-
-Loop((year,country),
-   Loop(month$(avail_month_structure_load(year,month,country) le 1.15),
-         avail_month_structure_load(year,month,country) = avail_month_structure_load(year,month,country) + correction_factor_load(year,country);
-   );
-
-   Loop(month$(avail_month_structure_resload(year,month,country) le 1.15),
-         avail_month_structure_resload(year,month,country) = avail_month_structure_resload(year,month,country) + correction_factor_resload(year,country);
-   );
-);
-sum_avail_month_structure_load(year,country) = sum(month, avail_month_structure_load(year,month,country)) + EPS;
-sum_avail_month_structure_resload(year,country) = sum(month, avail_month_structure_resload(year,month,country)) + EPS;
-*Display avail_month_structure_load,avail_month_structure_resload,sum_avail_month_structure_load,sum_avail_month_structure_resload;
-
-availability_conv(country,conv,year,hour_all)$(hour(year,hour_all)) = (1 - plannedoutages_conv(country,conv,year)) * sum(month$(map_hourmonth(year,hour_all,month)), avail_month_structure_resload(year,month,country)) - forcedoutages_conv(country,conv,year);
-
-availability_conv(country,'nuclear_old_1900-2020','2017',hour_all)$(hour('2017',hour_all)) = ((1 - plannedoutages_conv(country,'nuclear_old_1900-2020','2017') - forcedoutages_conv(country,'nuclear_old_1900-2020','2017')) * sum(month$(map_hourmonth('2017',hour_all,month)), avail_month_structure_nuclear('2017',month,country)))$( sum(month, avail_month_structure_nuclear('2017',month,country)) gt 0)
-                                                                                             +
-                                                                                             ((1 - plannedoutages_conv(country,'nuclear_old_1900-2020','2017')) * sum(month$(map_hourmonth('2017',hour_all,month)), avail_month_structure('2017',month,country)) - forcedoutages_conv(country,'nuclear_old_1900-2020','2017') )$( sum(month, avail_month_structure_nuclear('2017',month,country)) eq 0);
-
-
-*Display availability_conv,plannedoutages_conv,forcedoutages_conv;
-
-availability_renew(country,renew_disp,year,hour_all)$(hour(year,hour_all) AND (inputdata_renew(renew_disp,'avail') lt 1)) = inputdata_renew(renew_disp,'avail') * sum(month$(map_hourmonth(year,hour_all,month)), avail_month_structure_resload(year,month,country));
+availability_renew(country,renew_disp,year,hour_all)$(hour(year,hour_all) AND (inputdata_renew(renew_disp,'avail') lt 1)) = sum(month$(map_hourmonth(year,hour_all,month)), availability_renew_month(country,renew_disp,year,month) );
 *Display availability_renew;
 
 year('2025') = NO;

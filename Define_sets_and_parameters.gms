@@ -32,7 +32,7 @@ output_country_hour_set  set for output_country_hour     /'load','load curtailme
                                                           'renewable curtailment','electricity price',
                                                           'uranium generation (chp)','lignite generation (chp)','hardcoal generation (chp)','gas generation (chp)','oil generation (chp)','bioenergy generation (chp)','waste generation (chp)',
                                                           'co2 emissions','lignite co2','hardcoal co2','gas co2','oil co2','waste co2',
-                                                          'uranium avail cap','lignite avail cap','hardcoal avail cap','gas avail cap','oil avail cap'/
+                                                          'uranium avail cap','lignite avail cap','hardcoal avail cap','gas avail cap','oil avail cap','netexport_border' /
 
 output_country_year_set  set for output_country_year
 /
@@ -142,6 +142,10 @@ load_structure(year_all,hour_all,country_all)                    hourly load str
 peakind(year_all,hour_all,country_all)                           peak indicator (1 if hour is a peak hour)
 borderflow(year_all,hour_all,country_all)                        netexport at model borders (MW)
 
+capfactor_solar_lowRES(year_all,hour_all,country_all)            hourly capacity factor for solar feed-in (MWh per MW) for scenario with low RES feed-in in winter
+capfactor_windonshore_lowRES(year_all,hour_all,country_all)      hourly capacity factor for windonshore feed-in (MWh per MW) for scenario with low RES feed-in in winter
+capfactor_windoffshore_lowRES(year_all,hour_all,country_all)     hourly capacity factor for windoffshore feed-in (MWh per MW) for scenario with low RES feed-in in winter
+
 *scenario parameters
 load_year(year_all,country_all)                                  yearly electrcity consumption (GWh)
 
@@ -149,6 +153,7 @@ ntc_year(year_all,country_all,country_all)                       yearly ntc valu
 ntc_year_day(year_all,day,country_all,country_all)               daily ntc value between two countries (MW)
 ntc_year_month(year_all,month,country_all,country_all)           monthly ntc value between two countries (MW)
 carbonprice_year(year_all)                                       yearly co2 price (EUR per tonne)
+carbonprice_month(year_all,month)                                monthly co2 price (EUR per tonne)
 
 *conv parameters
 inputdata_conv(conv,*)                                           excel input table for conv
@@ -167,6 +172,9 @@ transportcost_conv(fuel_conv)                                    transport cost 
 
 avail_month_structure(year_all,month,country_all)
 avail_month_structure_nuclear(year_all,month,country_all)
+avail_month_structure_lignite(year_all,month,country_all)
+avail_month_structure_hardcoal(year_all,month,country_all)
+avail_month_structure_gas(year_all,month,country_all)
 fuelprice_countryfactor(country_all,year_all,fuel_conv)
 
 outages_conv(*,conv,year_all,country_all)                        country-specific yearly outages (%)
@@ -193,6 +201,8 @@ gen_renew_structure_monthly_exogen(renew,year_all,month,country_all)     monthly
 inputdata_stor(stor,*)                                                   excel input table for stor
 covernight_kW_stor(stor,year_all)                                        overnight investment cost for storage turbine (€ per kW)
 covernight_kWh_stor(stor,year_all)                                       overnight investment cost for storage (€ per kWh)
+storageduration(stor,country_all)                                        storage duration (hours)
+discharge_to_charge_ratio(stor,country_all)                              discharge (turbine) to charge (pump) ratio (-)
 cap_stor_install_exogen_year(stor,year_all,country_all)                  capacity installed exogenously (MW)
 gen_stor_exogen(stor,year_all,country_all)                               generation exogenously (GWh) for calibration and validation
 
@@ -208,6 +218,8 @@ emissionreduction(year_all)              emission reduction (% of year '2017')
 
 *yearly parameters
 carbonprice(country_all,year_all)                        considered co2 price path (EUR per tonne)
+carbonprice_hour(country_all,year_all,hour_all)
+
 load(country_all,year_all,hour_all)                      considered load (MWh per h)
 ntc(country_all,country_all,year_all)                    considered ntc path (MW)
 ntc_hour(country_all,country_all,year_all,hour_all)      considered ntc path (MW)
@@ -230,6 +242,11 @@ cvar_conv_full(country_all,conv,year_all)        variable generation cost at ful
 cvar_conv_min(country_all,conv,year_all)         variable generation cost at minimum capacity (€ per MWh)
 cvar_conv_avg(country_all,conv,year_all)         variable generation cost at average capacity (€ per MWh)
 
+cvar_conv_full_hour(country_all,conv,year_all,hour_all)        variable generation cost at full capacity (€ per MWh)
+cvar_conv_min_hour(country_all,conv,year_all,hour_all)         variable generation cost at minimum capacity (€ per MWh)
+cvar_conv_avg_hour(country_all,conv,year_all,hour_all)         variable generation cost at average capacity (€ per MWh)
+
+
 efficiency_conv_full(country_all,conv,year_all)  efficiency at full capacity (%)
 efficiency_conv_min(country_all,conv,year_all)   efficiency at minimum capacity (%)
 efficiency_conv_avg(country_all,conv,year_all)   efficiency at average capacity (%)
@@ -238,11 +255,16 @@ emf_conv_full(country_all,conv,year_all)         emission factor at full capacit
 emf_conv_min(country_all,conv,year_all)          emission factor at minimum capacity (tCO2 per MWh_el)
 emf_conv_avg(country_all,conv,year_all)          emission factor at average capacity (tCO2 per MWh_el)
 fuelprice_conv(country_all,fuel_conv,year_all)   considered hourly fuel price path (EUR per MWh_th)
+fuelprice_conv_hour(country_all,fuel_conv,year_all,hour_all)
 gmin_conv(conv)                                  minimum generation level
 
 cap_conv_add_up(country_all,conv,year_all)
 cap_conv_install_up(country_all,conv)
 load_max(country_all)
+
+cap_conv_install_L(country_all,conv,year_all)
+flow_L(year_all,hour_all,country_all,country_all)
+
 
 *renew paramters
 availability_renew(country_all,renew,year_all,hour_all)  availability of dispatchable renewables
@@ -254,6 +276,7 @@ capfactor_renew_min(country_all,renew,year_all,hour_all) minimum capacity factor
 cfix_renew(renew,year_all)                               yearly fix cost (€ per MW)
 cinv_renew(renew,year_all)                               annual investment cost (€ per MW and year)
 cvar_renew(country_all,renew,year_all)                   variable generation cost (€ per MWh)
+cvar_renew_hour(country_all,renew,year_all,hour_all)
 efficiency_renew(renew)                                  efficiency (%)
 emf_renew(renew)                                         emission factor (tCO2 per MWh_el)
 emf_renew_countryyear(country_all,renew,year_all)
@@ -271,7 +294,8 @@ cfix_stor(stor,year_all)                                 yearly fix cost (€ per 
 cinv_MW_stor(stor,year_all)                              annual investment cost for storage turbine (€ per MW and year)
 cinv_MWh_stor(stor,year_all)                             annual investment cost for storage (€ per MWh and year)
 efficiency_stor(stor)                                    efficiency (%)
-storageduration(stor)                                    storage duration (hours)
+duration_stor(country_all,stor)                          duration to charge the storage (h)
+discharge_to_charge_ratio_stor(country_all,stor)         discharge (turbine) to charge (pump) ratio (-)
 
 *other parameters
 ccurt_load_year(year_all)
@@ -295,9 +319,17 @@ last_hour(year_all)
 step_hour(year_all,hour_all)
 n
 
+*Parameters for calculation of monthly availability structure
+max_monthlyresload_norm(country_all,year_all,month)
+availability_conv_planned(country_all,conv,year_all,month)
+sum_availability_conv_planned(country_all,conv,year_all)
+availability_renew_month(country_all,renew,year_all,month)
+sum_availability_renew_month(country_all,renew,year_all)
+
 *output
 output_country_hour(country_all,year_all,hour_all,output_country_hour_set)
-output_country_hour_conv(conv,hour_all,country_all,year_all,*)
+output_country_hour_conv(country_all,conv,year_all,hour_all,*)
+
 output_country_year(country_all,year_all,output_country_year_set)
 output_country_year_conv(country_all,conv,year_all,output_country_year_conv_set)
 output_year(year_all,output_country_year_set)
@@ -381,11 +413,6 @@ output_FR_year(year_all,output_country_year_set)
 output_FR_export_hour(year_all,hour_all,*,country_all)
 output_FR_export_year(year_all,*,country_all)
 
-output_GB_hour(year_all,hour_all,output_country_hour_set)
-output_GB_year(year_all,output_country_year_set)
-output_GB_export_hour(year_all,hour_all,*,country_all)
-output_GB_export_year(year_all,*,country_all)
-
 output_GR_hour(year_all,hour_all,output_country_hour_set)
 output_GR_year(year_all,output_country_year_set)
 output_GR_export_hour(year_all,hour_all,*,country_all)
@@ -406,10 +433,10 @@ output_IBER_year(year_all,output_country_year_set)
 output_IBER_export_hour(year_all,hour_all,*,country_all)
 output_IBER_export_year(year_all,*,country_all)
 
-output_IRIS_hour(year_all,hour_all,output_country_hour_set)
-output_IRIS_year(year_all,output_country_year_set)
-output_IRIS_export_hour(year_all,hour_all,*,country_all)
-output_IRIS_export_year(year_all,*,country_all)
+output_IE_hour(year_all,hour_all,output_country_hour_set)
+output_IE_year(year_all,output_country_year_set)
+output_IE_export_hour(year_all,hour_all,*,country_all)
+output_IE_export_year(year_all,*,country_all)
 
 output_IT_hour(year_all,hour_all,output_country_hour_set)
 output_IT_year(year_all,output_country_year_set)
@@ -456,5 +483,8 @@ output_SK_year(year_all,output_country_year_set)
 output_SK_export_hour(year_all,hour_all,*,country_all)
 output_SK_export_year(year_all,*,country_all)
 
-output_nuclear_hour(year_all,hour_all,country_all,*)
+output_UK_hour(year_all,hour_all,output_country_hour_set)
+output_UK_year(year_all,output_country_year_set)
+output_UK_export_hour(year_all,hour_all,*,country_all)
+output_UK_export_year(year_all,*,country_all)
 ;

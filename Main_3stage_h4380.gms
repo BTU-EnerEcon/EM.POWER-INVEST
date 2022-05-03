@@ -44,13 +44,13 @@ $onUNDF
 $gdxin Input\Input_h8760.gdx
 $load country_all
 $load hour_all
+$load map_hourmonth
 $gdxin
 $offUNDF
 *Display country_all;
 
 $onUNDF
 $gdxin Input\Input_hour_reduced_Every25hour_2ExtremeDays.gdx
-*$gdxin Input\Input_hour_reduced_Every25hour_2ExtremeDays_Load110.gdx
 $load hour
 $load load_structure
 $load capfactor_solar
@@ -63,7 +63,6 @@ $load chp_structure
 $load chp_trimmed_structure
 $load peakind
 $load borderflow
-$load map_hourmonth
 $load map_hourday
 $load first_hour
 $load last_hour
@@ -73,10 +72,8 @@ $offUNDF
 
 *yearly data
 $onUNDF
-*$gdxin Input\Input_yearly_TYNDP_GA.gdx
-*$gdxin Input\Input_yearly_oldworldFederalGovernment_constantFuelprices.gdx
-*$gdxin Input\Input_yearly_oldworldMarketPrices_constantFuelprices.gdx
-$gdxin Input\Input_yearly_newworldMarketPrices_constantFuelprices.gdx
+$gdxin Input\Input_yearly_scenario3.gdx
+*$gdxin Input\Input_yearly_scenarios1and2.gdx
 
 $load fuel_conv
 $load fuel_renew
@@ -102,7 +99,6 @@ $load eff_conv_old_phaseout
 $load gen_conv_old
 $load gen_CHP_conv_old
 $load outages_conv
-$load avail_month_structure
 $load avail_month_structure_nuclear
 $load carboncontent_conv
 $load fuelprice_conv_year
@@ -120,16 +116,27 @@ $load carboncontent_renew
 $load inputdata_stor
 $load covernight_kW_stor
 $load covernight_kWh_stor
+$load storageduration
+$load discharge_to_charge_ratio
 $load cap_stor_install_exogen_year
 $load gen_stor_exogen
 $gdxin
 $offUNDF
 
+*monthly availability structure
+$onUNDF
+$gdxin Input\Input_MonthlyAvailabilityStructure.gdx
+$load availability_conv_planned
+$load availability_renew_month
+$gdxin
+$offUNDF
+
 Option Profile=2;
 Option Profiletol=0.01;
-Option limrow=500;
-Option limcol=500;
+Option limrow=10;
+Option limcol=10;
 Option reslim=5000000;
+Option solvelink=0;
 Option LP=cplex;
 
 *############################################################################
@@ -141,13 +148,12 @@ Option LP=cplex;
 *
 *############################################################################
 
-$Include Declare_sets_and_parameters.gms
-
-*Display ntc,ntc_hour;
-
 $Include Model.gms
 
+$Include Declare_sets_and_parameters.gms
+
 Investment.bratio = 1;
+Dispatch.bratio = 1;
 
 indicator_partload = 0;
 indicator_ramping = 0;
@@ -180,10 +186,9 @@ cap_conv_install_up(country,conv)$(convyear_lo(conv) ge 2020 ) = 0$(cap_conv_add
 
 indicator_loadcurt(country) = 0;
 
-Option threads=1;
+Investment.optfile=1;
 
 Solve Investment using LP minimizing COST;
-*Display RES_CAP_CONV_ADD_up.M;
 
 *Statistcs for stage 1
 output_performance('modelStat','run1') = Investment.modelStat;
@@ -222,10 +227,20 @@ par=output_DE_year               rng=DE_year!A4                  rdim=1  cdim=1
 par=output_DE_hour               rng=DE_hour!A4                  rdim=2  cdim=1
 par=output_DE_export_year        rng=DE_export_year!A4           rdim=2  cdim=1
 par=output_DE_export_hour        rng=DE_export_hour!A4           rdim=2  cdim=2
+par=output_NL_year               rng=NL_year!A4                  rdim=1  cdim=1
+par=output_NL_hour               rng=NL_hour!A4                  rdim=2  cdim=1
+par=output_NL_export_year        rng=NL_export_year!A4           rdim=2  cdim=1
+par=output_NL_export_hour        rng=NL_export_hour!A4           rdim=2  cdim=2
+par=output_FR_year               rng=FR_year!A4                  rdim=1  cdim=1
+par=output_FR_hour               rng=FR_hour!A4                  rdim=2  cdim=1
+par=output_FR_export_year        rng=FR_export_year!A4           rdim=2  cdim=1
+par=output_FR_export_hour        rng=FR_export_hour!A4           rdim=2  cdim=2
 $offecho
 
 put_utility 'gdxout' / 'Output\Output_all_stage1';
-execute_unload output_year,output_DE_year,output_DE_hour,output_DE_export_year,output_DE_export_hour;
+execute_unload output_year,output_DE_year,output_DE_hour,output_DE_export_year,output_DE_export_hour,
+               output_NL_year,output_NL_hour,output_NL_export_year,output_NL_export_hour,
+               output_FR_year,output_FR_hour,output_FR_export_year,output_FR_export_hour;
 
 put_utility 'exec' /'gdxxrw.exe I=Output\Output_all_stage1.gdx O=Output\3stage\Output_all_stage1.xlsx @Output\Output_all_stage1.tmp';
 
@@ -273,34 +288,34 @@ Option Clear = output_SE_export_hour;
 Option Clear = output_BALT_hour;
 Option Clear = output_BG_hour;
 Option Clear = output_FI_hour;
-Option Clear = output_GB_hour;
 Option Clear = output_GR_hour;
 Option Clear = output_HR_hour;
 Option Clear = output_HU_hour;
 Option Clear = output_IBER_hour;
-Option Clear = output_IRIS_hour;
+Option Clear = output_IE_hour;
 Option Clear = output_IT_hour;
 Option Clear = output_MT_hour;
 Option Clear = output_NO_hour;
 Option Clear = output_RO_hour;
 Option Clear = output_SI_hour;
 Option Clear = output_SK_hour;
+Option Clear = output_UK_hour;
 
 Option Clear = output_BALT_export_hour;
 Option Clear = output_BG_export_hour;
 Option Clear = output_FI_export_hour;
-Option Clear = output_GB_export_hour;
 Option Clear = output_GR_export_hour;
 Option Clear = output_HR_export_hour;
 Option Clear = output_HU_export_hour;
 Option Clear = output_IBER_export_hour;
-Option Clear = output_IRIS_export_hour;
+Option Clear = output_IE_export_hour;
 Option Clear = output_IT_export_hour;
 Option Clear = output_MT_export_hour;
 Option Clear = output_NO_export_hour;
 Option Clear = output_RO_export_hour;
 Option Clear = output_SI_export_hour;
 Option Clear = output_SK_export_hour;
+Option Clear = output_UK_export_hour;
 
 Option Clear = output_DE_hour_conv;
 
@@ -315,25 +330,31 @@ $Include Declare_sets_and_parameters_h4380.gms
 *Display ntc,ntc_hour;
 
 *Fix investment and divestment decisions => dispatch problem
-CAP_CONV_INSTALL.FX(country,conv,year) = CAP_CONV_INSTALL.L(country,conv,year);
-CAP_CONV_ADD.FX(country,conv,year) = CAP_CONV_ADD.L(country,conv,year);
-CAP_CONV_SUB.FX(country,conv,year) = CAP_CONV_SUB.L(country,conv,year);
+cap_conv_install_L(country,conv,year) = CAP_CONV_INSTALL.L(country,conv,year);
 
 indicator_loadcurt(country) = 1;
+Dispatch.optfile=1;
 
-Solve Investment using LP minimizing COST;
+Solve Dispatch using LP minimizing COST;
+
+flow_L(year,hour_all,country,country2)$(hour(year,hour_all) AND (ntc(country,country2,year) + ntc(country2,country,year) gt 0)) = FLOW.L(country,country2,year,hour_all) + EPS;
+
+
+output_AT_export_hour(year,hour_all,'export',country2)$(hour(year,hour_all) AND (ntc('AT',country2,year) gt 0)) = FLOW.L('AT',country2,year,hour_all) + EPS;
+output_AT_export_hour(year,hour_all,'import',country2)$(hour(year,hour_all) AND (ntc(country2,'AT',year) gt 0)) = FLOW.L(country2,'AT',year,hour_all) + EPS;
+
 
 *Statistcs for stage 2
-output_performance('modelStat','run2') = Investment.modelStat;
-output_performance('solveStat','run2') = Investment.solveStat;
-output_performance('resGen','run2') = Investment.resGen;
-output_performance('resUsd','run2') = Investment.resUsd;
-output_performance('etAlg','run2') = Investment.etAlg;
-output_performance('etSolve','run2') = Investment.etSolve;
-output_performance('etSolver','run2') = Investment.etSolver;
-output_performance('numEqu','run2') = Investment.numEqu;
-output_performance('numVar','run2') = Investment.numVar;
-output_performance('ObjVal','run2') = Investment.ObjVal;
+output_performance('modelStat','run2') = Dispatch.modelStat;
+output_performance('solveStat','run2') = Dispatch.solveStat;
+output_performance('resGen','run2') = Dispatch.resGen;
+output_performance('resUsd','run2') = Dispatch.resUsd;
+output_performance('etAlg','run2') = Dispatch.etAlg;
+output_performance('etSolve','run2') = Dispatch.etSolve;
+output_performance('etSolver','run2') = Dispatch.etSolver;
+output_performance('numEqu','run2') = Dispatch.numEqu;
+output_performance('numVar','run2') = Dispatch.numVar;
+output_performance('ObjVal','run2') = Dispatch.ObjVal;
 
 output_configuration('#technologies','run2') = sum(conv$( convyear_lo(conv) le ( sum(year$(ord(year) eq card(year)), yearnumber(year)) )  ), 1);
 output_configuration('#countries','run2') = card(country);
@@ -354,10 +375,38 @@ output_configuration('fuelprice_countryfactor','run2') = indicator_fuelprice_cou
 *Save output of stage 2, in order to have solution values for Europe countries (not considered in stage 3)
 $Include Output_declaration.gms
 
+
+$onecho > Output\Output_all_stage2.tmp
+epsout = 0
+par=output_year                  rng=year!A4                     rdim=1  cdim=1
+par=output_DE_year               rng=DE_year!A4                  rdim=1  cdim=1
+par=output_DE_hour               rng=DE_hour!A4                  rdim=2  cdim=1
+par=output_DE_export_year        rng=DE_export_year!A4           rdim=2  cdim=1
+par=output_DE_export_hour        rng=DE_export_hour!A4           rdim=2  cdim=2
+par=output_NL_year               rng=NL_year!A4                  rdim=1  cdim=1
+par=output_NL_hour               rng=NL_hour!A4                  rdim=2  cdim=1
+par=output_NL_export_year        rng=NL_export_year!A4           rdim=2  cdim=1
+par=output_NL_export_hour        rng=NL_export_hour!A4           rdim=2  cdim=2
+par=output_FR_year               rng=FR_year!A4                  rdim=1  cdim=1
+par=output_FR_hour               rng=FR_hour!A4                  rdim=2  cdim=1
+par=output_FR_export_year        rng=FR_export_year!A4           rdim=2  cdim=1
+par=output_FR_export_hour        rng=FR_export_hour!A4           rdim=2  cdim=2
+par=flow_L                       rng=flow_L!A4                   rdim=2  cdim=2
+$offecho
+
+
+put_utility 'gdxout' / 'Output\Output_all_stage2';
+execute_unload output_year,output_DE_year,output_DE_hour,output_DE_export_year,output_DE_export_hour,
+               output_NL_year,output_NL_hour,output_NL_export_year,output_NL_export_hour,
+               output_FR_year,output_FR_hour,output_FR_export_year,output_FR_export_hour,
+               flow_L;
+
+put_utility 'exec' /'gdxxrw.exe I=Output\Output_all_stage2.gdx O=Output\3stage\Output_all_stage2.xlsx @Output\Output_all_stage2.tmp';
+
 *###############################################################################
 *
 *        stage 3:
-*        - investment and dispatch for Germany (and Luxembourg)
+*        - investment and dispatch for Germany+Luxembourg and Netherlands
 *        - with part-load and startup costs
 *        - high hourly resolution
 *        - import and exports to neighbours are fixed with solution of stage 2
@@ -366,10 +415,11 @@ $Include Output_declaration.gms
 
 Option Clear = netexport_border;
 
-netexport_border('DE+LU',year,hour_all)$(hour(year,hour_all)) = sum(country2, FLOW.L('DE+LU',country2,year,hour_all) - FLOW.L(country2,'DE+LU',year,hour_all));
-
 country(country_all) = NO;
 country('DE+LU') = YES;
+
+netexport_border(country,year,hour_all)$(hour(year,hour_all)) = sum(country_all$(not country2(country_all)), FLOW.L(country,country_all,year,hour_all) - FLOW.L(country_all,country,year,hour_all));
+
 
 *Unfix investment and divestment decisions
 CAP_CONV_INSTALL.LO(country,conv,year) = 0;
@@ -386,12 +436,11 @@ indicator_ramping = 1;
 indicator_partload_country(country) = indicator_partload;
 indicator_ramping_country(country) = indicator_ramping;
 
-indicator_loadcurt(country) = 0;
+indicator_loadcurt(country) = 1;
 
-Option threads=10;
+Investment.optfile=1;
 
 Solve Investment using LP minimizing COST;
-Display RES_CAP_CONV_ADD_up.M;
 
 *Statistcs for stage 3
 output_performance('modelStat','run3') = Investment.modelStat;
@@ -421,20 +470,25 @@ output_configuration('divestment','run3') = indicator_divestment + EPS;
 output_configuration('futurechp','run3') = indicator_futurechp + EPS;
 output_configuration('fuelprice_countryfactor','run3') = indicator_fuelprice_countryfactor + EPS;
 
-
 *Save output of stage 3, i.e. solution for Germany (its solution of stage 2 is overwritten)
 $Include Output_declaration.gms
 
 output_DE_hour(year,hour_all,'export_sum')$(hour(year,hour_all)) = sum(country_all$(ntc('DE+LU',country_all,year) gt 0), output_DE_export_hour(year,hour_all,'export',country_all)) + EPS;
 output_DE_hour(year,hour_all,'import_sum')$(hour(year,hour_all)) = sum(country_all$(ntc(country_all,'DE+LU',year) gt 0), output_DE_export_hour(year,hour_all,'import',country_all)) + EPS;
 
+output_NL_hour(year,hour_all,'export_sum')$(hour(year,hour_all)) = sum(country_all$(ntc('NL',country_all,year) gt 0), output_NL_export_hour(year,hour_all,'export',country_all)) + EPS;
+output_NL_hour(year,hour_all,'import_sum')$(hour(year,hour_all)) = sum(country_all$(ntc(country_all,'NL',year) gt 0), output_NL_export_hour(year,hour_all,'import',country_all)) + EPS;
+
 output_DE_year(year,'export_sum') = sum(country_all$(ntc('DE+LU',country_all,year) gt 0), output_DE_export_year(year,'export',country_all)) + EPS;
 output_DE_year(year,'import_sum') = sum(country_all$(ntc(country_all,'DE+LU',year) gt 0), output_DE_export_year(year,'import',country_all)) + EPS;
+
+output_NL_year(year,'export_sum') = sum(country_all$(ntc('NL',country_all,year) gt 0), output_NL_export_year(year,'export',country_all)) + EPS;
+output_NL_year(year,'import_sum') = sum(country_all$(ntc(country_all,'NL',year) gt 0), output_NL_export_year(year,'import',country_all)) + EPS;
 
 
 *###############################################################################
 *Export output to excel file
-$onecho > Output\Output_all_3stage_DE+neighbors.tmp
+$onecho > Output\Output_all_stage3_DE.tmp
 epsout = 0
 par=output_configuration         rng=configuration!A4            rdim=1  cdim=1
 par=output_performance           rng=performance!A4              rdim=1  cdim=1
@@ -447,8 +501,10 @@ par=output_CZ_year               rng=CZ_year!A4                  rdim=1  cdim=1
 par=output_DK_year               rng=DK_year!A4                  rdim=1  cdim=1
 par=output_FR_year               rng=FR_year!A4                  rdim=1  cdim=1
 par=output_NL_year               rng=NL_year!A4                  rdim=1  cdim=1
+par=output_NO_year               rng=NO_year!A4                  rdim=1  cdim=1
 par=output_PL_year               rng=PL_year!A4                  rdim=1  cdim=1
 par=output_SE_year               rng=SE_year!A4                  rdim=1  cdim=1
+par=output_UK_year               rng=UK_year!A4                  rdim=1  cdim=1
 par=output_DE_export_year        rng=DE_export_year!A4           rdim=2  cdim=1
 par=output_AT_export_year        rng=AT_export_year!A4           rdim=2  cdim=1
 par=output_BE_export_year        rng=BE_export_year!A4           rdim=2  cdim=1
@@ -457,8 +513,10 @@ par=output_CZ_export_year        rng=CZ_export_year!A4           rdim=2  cdim=1
 par=output_DK_export_year        rng=DK_export_year!A4           rdim=2  cdim=1
 par=output_FR_export_year        rng=FR_export_year!A4           rdim=2  cdim=1
 par=output_NL_export_year        rng=NL_export_year!A4           rdim=2  cdim=1
+par=output_NO_export_year        rng=NO_export_year!A4           rdim=2  cdim=1
 par=output_PL_export_year        rng=PL_export_year!A4           rdim=2  cdim=1
 par=output_SE_export_year        rng=SE_export_year!A4           rdim=2  cdim=1
+par=output_UK_export_year        rng=UK_export_year!A4           rdim=2  cdim=1
 par=output_DE_hour               rng=DE_hour!A4                  rdim=2  cdim=1
 par=output_AT_hour               rng=AT_hour!A4                  rdim=2  cdim=1
 par=output_BE_hour               rng=BE_hour!A4                  rdim=2  cdim=1
@@ -467,8 +525,10 @@ par=output_CZ_hour               rng=CZ_hour!A4                  rdim=2  cdim=1
 par=output_DK_hour               rng=DK_hour!A4                  rdim=2  cdim=1
 par=output_FR_hour               rng=FR_hour!A4                  rdim=2  cdim=1
 par=output_NL_hour               rng=NL_hour!A4                  rdim=2  cdim=1
+par=output_NO_hour               rng=NO_hour!A4                  rdim=2  cdim=1
 par=output_PL_hour               rng=PL_hour!A4                  rdim=2  cdim=1
 par=output_SE_hour               rng=SE_hour!A4                  rdim=2  cdim=1
+par=output_UK_hour               rng=UK_hour!A4                  rdim=2  cdim=1
 par=output_DE_export_hour        rng=DE_export_hour!A4           rdim=2  cdim=2
 par=output_AT_export_hour        rng=AT_export_hour!A4           rdim=2  cdim=2
 par=output_BE_export_hour        rng=BE_export_hour!A4           rdim=2  cdim=2
@@ -477,111 +537,100 @@ par=output_CZ_export_hour        rng=CZ_export_hour!A4           rdim=2  cdim=2
 par=output_DK_export_hour        rng=DK_export_hour!A4           rdim=2  cdim=2
 par=output_FR_export_hour        rng=FR_export_hour!A4           rdim=2  cdim=2
 par=output_NL_export_hour        rng=NL_export_hour!A4           rdim=2  cdim=2
+par=output_NO_export_hour        rng=NO_export_hour!A4           rdim=2  cdim=2
 par=output_PL_export_hour        rng=PL_export_hour!A4           rdim=2  cdim=2
 par=output_SE_export_hour        rng=SE_export_hour!A4           rdim=2  cdim=2
+par=output_UK_export_hour        rng=UK_export_hour!A4           rdim=2  cdim=2
 par=output_DE_hour_conv          rng=DE_hour_conv!A4             rdim=2  cdim=2
 par=output_DE_year_conv          rng=DE_year_conv!A4             rdim=2  cdim=1
-par=output_nuclear_hour          rng=nuclear_hour!A4             rdim=2  cdim=2
 par=output_country_year_conv     rng=country_year_conv!A4        rdim=3  cdim=1
 $offecho
 
 
 *Export output to excel file
-$onecho > Output\Output_all_3stage_outside.tmp
+$onecho > Output\Output_all_stage3_outside.tmp
 epsout = 0
 par=output_BALT_year             rng=BALT_year!A4                rdim=1  cdim=1
 par=output_BG_year               rng=BG_year!A4                  rdim=1  cdim=1
 par=output_FI_year               rng=FI_year!A4                  rdim=1  cdim=1
-par=output_GB_year               rng=GB_year!A4                  rdim=1  cdim=1
 par=output_GR_year               rng=GR_year!A4                  rdim=1  cdim=1
 par=output_HR_year               rng=HR_year!A4                  rdim=1  cdim=1
 par=output_HU_year               rng=HU_year!A4                  rdim=1  cdim=1
 par=output_IBER_year             rng=IBER_year!A4                rdim=1  cdim=1
-par=output_IRIS_year             rng=IRIS_year!A4                rdim=1  cdim=1
+par=output_IE_year               rng=IE_year!A4                  rdim=1  cdim=1
 par=output_IT_year               rng=IT_year!A4                  rdim=1  cdim=1
 par=output_MT_year               rng=MT_year!A4                  rdim=1  cdim=1
-par=output_NO_year               rng=NO_year!A4                  rdim=1  cdim=1
 par=output_RO_year               rng=RO_year!A4                  rdim=1  cdim=1
 par=output_SI_year               rng=SI_year!A4                  rdim=1  cdim=1
 par=output_SK_year               rng=SK_year!A4                  rdim=1  cdim=1
 par=output_BALT_export_year      rng=BALT_export_year!A4         rdim=2  cdim=1
 par=output_BG_export_year        rng=BG_export_year!A4           rdim=2  cdim=1
 par=output_FI_export_year        rng=FI_export_year!A4           rdim=2  cdim=1
-par=output_GB_export_year        rng=GB_export_year!A4           rdim=2  cdim=1
 par=output_GR_export_year        rng=GR_export_year!A4           rdim=2  cdim=1
 par=output_HR_export_year        rng=HR_export_year!A4           rdim=2  cdim=1
 par=output_HU_export_year        rng=HU_export_year!A4           rdim=2  cdim=1
 par=output_IBER_export_year      rng=IBER_export_year!A4         rdim=2  cdim=1
-par=output_IRIS_export_year      rng=IRIS_export_year!A4         rdim=2  cdim=1
+par=output_IE_export_year        rng=IE_export_year!A4           rdim=2  cdim=1
 par=output_MT_export_year        rng=MT_export_year!A4           rdim=2  cdim=1
-par=output_NO_export_year        rng=NO_export_year!A4           rdim=2  cdim=1
 par=output_RO_export_year        rng=RO_export_year!A4           rdim=2  cdim=1
 par=output_SI_export_year        rng=SI_export_year!A4           rdim=2  cdim=1
 par=output_SK_export_year        rng=SK_export_year!A4           rdim=2  cdim=1
 par=output_BALT_hour             rng=BALT_hour!A4                rdim=2  cdim=1
 par=output_BG_hour               rng=BG_hour!A4                  rdim=2  cdim=1
 par=output_FI_hour               rng=FI_hour!A4                  rdim=2  cdim=1
-par=output_GB_hour               rng=GB_hour!A4                  rdim=2  cdim=1
 par=output_GR_hour               rng=GR_hour!A4                  rdim=2  cdim=1
 par=output_HR_hour               rng=HR_hour!A4                  rdim=2  cdim=1
 par=output_HU_hour               rng=HU_hour!A4                  rdim=2  cdim=1
 par=output_IBER_hour             rng=IBER_hour!A4                rdim=2  cdim=1
-par=output_IRIS_hour             rng=IRIS_hour!A4                rdim=2  cdim=1
+par=output_IE_hour               rng=IE_hour!A4                  rdim=2  cdim=1
 par=output_IT_hour               rng=IT_hour!A4                  rdim=2  cdim=1
 par=output_MT_hour               rng=MT_hour!A4                  rdim=2  cdim=1
-par=output_NO_hour               rng=NO_hour!A4                  rdim=2  cdim=1
 par=output_RO_hour               rng=RO_hour!A4                  rdim=2  cdim=1
 par=output_SI_hour               rng=SI_hour!A4                  rdim=2  cdim=1
 par=output_SK_hour               rng=SK_hour!A4                  rdim=2  cdim=1
 par=output_BALT_export_hour      rng=BALT_export_hour!A4         rdim=2  cdim=2
 par=output_BG_export_hour        rng=BG_export_hour!A4           rdim=2  cdim=2
 par=output_FI_export_hour        rng=FI_export_hour!A4           rdim=2  cdim=2
-par=output_GB_export_hour        rng=GB_export_hour!A4           rdim=2  cdim=2
 par=output_GR_export_hour        rng=GR_export_hour!A4           rdim=2  cdim=2
 par=output_HR_export_hour        rng=HR_export_hour!A4           rdim=2  cdim=2
 par=output_HU_export_hour        rng=HU_export_hour!A4           rdim=2  cdim=2
 par=output_IBER_export_hour      rng=IBER_export_hour!A4         rdim=2  cdim=2
-par=output_IRIS_export_hour      rng=IRIS_export_hour!A4         rdim=2  cdim=2
+par=output_IE_export_hour        rng=IE_export_hour!A4           rdim=2  cdim=2
 par=output_IT_export_hour        rng=IT_export_hour!A4           rdim=2  cdim=2
 par=output_MT_export_hour        rng=MT_export_hour!A4           rdim=2  cdim=2
-par=output_NO_export_hour        rng=NO_export_hour!A4           rdim=2  cdim=2
 par=output_RO_export_hour        rng=RO_export_hour!A4           rdim=2  cdim=2
 par=output_SI_export_hour        rng=SI_export_hour!A4           rdim=2  cdim=2
 par=output_SK_export_hour        rng=SK_export_hour!A4           rdim=2  cdim=2
 $offecho
 
-put_utility 'gdxout' / 'Output\Output_all_3stage_DE+neighbors';
+put_utility 'gdxout' / 'Output\Output_all_stage3_DE';
 execute_unload output_configuration,output_performance,output_year,
-               output_DE_year,output_AT_year,output_BE_year,output_CH_year,output_CZ_year,
-               output_DK_year,output_FR_year,output_NL_year,output_PL_year,output_SE_year,
-               output_DE_export_year,output_AT_export_year,output_BE_export_year,output_CH_export_year,output_CZ_export_year,
-               output_DK_export_year,output_FR_export_year,output_NL_export_year,output_PL_export_year,output_SE_export_year,
-               output_DE_hour,output_AT_hour,output_BE_hour,output_CH_hour,output_CZ_hour,
-               output_DK_hour,output_FR_hour,output_NL_hour,output_PL_hour,output_SE_hour,
-               output_DE_export_hour,output_AT_export_hour,output_BE_export_hour,output_CH_export_hour,output_CZ_export_hour,
-               output_DK_export_hour,output_FR_export_hour,output_NL_export_hour,output_PL_export_hour,output_SE_export_hour,
+               output_DE_year,output_AT_year,output_BE_year,output_CH_year,output_CZ_year,output_DK_year,
+               output_FR_year,output_NL_year,output_NO_year,output_PL_year,output_SE_year,output_UK_year
+               output_DE_export_year,output_AT_export_year,output_BE_export_year,output_CH_export_year,output_CZ_export_year,output_DK_export_year,
+               output_FR_export_year,output_NL_export_year,output_NO_export_year,output_PL_export_year,output_SE_export_year,output_UK_export_year,
+               output_DE_hour,output_AT_hour,output_BE_hour,output_CH_hour,output_CZ_hour,output_DK_hour,
+               output_FR_hour,output_NL_hour,output_NO_hour,output_PL_hour,output_SE_hour,output_UK_hour,
+               output_DE_export_hour,output_AT_export_hour,output_BE_export_hour,output_CH_export_hour,output_CZ_export_hour,output_DK_export_hour,
+               output_FR_export_hour,output_NL_export_hour,output_NO_export_hour,output_PL_export_hour,output_SE_export_hour,output_UK_export_hour,
                output_DE_hour_conv,output_DE_year_conv,
-               output_nuclear_hour,output_country_year_conv;
+               output_country_year_conv;
 
-put_utility 'exec' /'gdxxrw.exe I=Output\Output_all_3stage_DE+neighbors.gdx O=Output\3stage\Output_all_3stage_DE+neighbors.xlsx @Output\Output_all_3stage_DE+neighbors.tmp';
+put_utility 'exec' /'gdxxrw.exe I=Output\Output_all_stage3_DE.gdx O=Output\3stage\Output_all_stage3_DE.xlsx @Output\Output_all_stage3_DE.tmp';
 
-put_utility 'gdxout' / 'Output\Output_all_3stage_outside';
+put_utility 'gdxout' / 'Output\Output_all_stage3_outside';
+execute_unload output_BALT_year,output_BG_year,output_FI_year,output_GR_year,
+               output_HR_year,output_HU_year,output_IBER_year,output_IE_year,
+               output_IT_year,output_MT_year,output_RO_year,output_SI_year,output_SK_year,
+               output_BALT_export_year,output_BG_export_year,output_FI_export_year,output_GR_export_year,
+               output_HR_export_year,output_HU_export_year,output_IBER_export_year,output_IE_export_year,
+               output_IT_export_year,output_MT_export_year,output_RO_export_year,output_SI_export_year,output_SK_export_year,
+               output_BALT_hour,output_BG_hour,output_FI_hour,output_GR_hour,
+               output_HR_hour,output_HU_hour,output_IBER_hour,output_IE_hour,
+               output_IT_hour,output_MT_hour,output_RO_hour,output_SI_hour,output_SK_hour,
+               output_BALT_export_hour,output_BG_export_hour,output_FI_export_hour,output_GR_export_hour,
+               output_HR_export_hour,output_HU_export_hour,output_IBER_export_hour,output_IE_export_hour,
+               output_IT_export_hour,output_MT_export_hour,output_RO_export_hour,output_SI_export_hour,output_SK_export_hour;
 
-execute_unload output_BALT_year,output_BG_year,output_FI_year,output_GB_year,output_GR_year,
-               output_HR_year,output_HU_year,output_IBER_year,output_IRIS_year,output_IT_year,
-               output_MT_year,output_NO_year,output_RO_year,output_SI_year,output_SK_year,
-               output_BALT_export_year,output_BG_export_year,output_FI_export_year,output_GB_export_year,output_GR_export_year,
-               output_HR_export_year,output_HU_export_year,output_IBER_export_year,output_IRIS_export_year,output_IT_export_year,
-               output_MT_export_year,output_NO_export_year,output_RO_export_year,output_SI_export_year,output_SK_export_year,
-               output_BALT_hour,output_BG_hour,output_FI_hour,output_GB_hour,output_GR_hour,
-               output_HR_hour,output_HU_hour,output_IBER_hour,output_IRIS_hour,output_IT_hour,
-               output_MT_hour,output_NO_hour,output_RO_hour,output_SI_hour,output_SK_hour,
-               output_BALT_export_hour,output_BG_export_hour,output_FI_export_hour,output_GB_export_hour,output_GR_export_hour,
-               output_HR_export_hour,output_HU_export_hour,output_IBER_export_hour,output_IRIS_export_hour,output_IT_export_hour,
-               output_MT_export_hour,output_NO_export_hour,output_RO_export_hour,output_SI_export_hour,output_SK_export_hour;
-
-
-put_utility 'exec' /'gdxxrw.exe I=Output\Output_all_3stage_outside.gdx O=Output\3stage\Output_all_3stage_outside.xlsx @Output\Output_all_3stage_outside.tmp';
-
-
+put_utility 'exec' /'gdxxrw.exe I=Output\Output_all_stage3_outside.gdx O=Output\3stage\Output_all_stage3_outside.xlsx @Output\Output_all_stage3_outside.tmp';
 

@@ -144,7 +144,8 @@ map_hourday('2040',hour_all,day)=map_hourday('2025',hour_all,day);
 map_hourday('2030',hour_all,day)=map_hourday('2025',hour_all,day);
 
 *yearly data
-$gdxin Input\Input_yearly.gdx
+$gdxin Input\Input_yearly_scenario3.gdx
+*$gdxin Input\Input_yearly_scenarios1and2.gdx
 $load renew
 $load load_year
 $load gen_renew_all_year
@@ -163,9 +164,9 @@ year('2030') = yes;
 year('2040') = yes;
 Display country,year;
 
-load_year('2025',country) = load_year('2025',country) * 1.1;
-load_year('2030',country) = load_year('2030',country) * 1.1;
-load_year('2040',country) = load_year('2040',country) * 1.1;
+load_year('2025',country) = load_year('2025',country);
+load_year('2030',country) = load_year('2030',country);
+load_year('2040',country) = load_year('2040',country);
 
 genrenew(country,'solar',year,'capfactor',hour_all) = capfactor_solar(year,hour_all,country);
 genrenew(country,'windonshore',year,'capfactor',hour_all) = capfactor_windonshore(year,hour_all,country);
@@ -578,6 +579,5 @@ map_hourmonth(year_all,hour_all,month)$(not hour(year_all,hour_all)) = no;
 map_hourday(year,hour_all,day)$(hour(year,hour_all)) = map_hourday('2020',hour_all,day);
 map_hourday(year_all,hour_all,day)$(not hour(year_all,hour_all)) = no;
 
-*put_utility 'gdxout' / 'Input\Input_hour_reduced_Every25hour_2ExtremeDays';
-put_utility 'gdxout' / 'Input\Input_hour_reduced_Every25hour_2ExtremeDays_Load110';
+put_utility 'gdxout' / 'Input\Input_hour_reduced_Every25hour_2ExtremeDays';
 execute_unload hour,load_structure,capfactor_solar,capfactor_windonshore,capfactor_windoffshore,capfactor_runofriver,capfactor_reservoir_max,capfactor_reservoir_min,chp_structure,chp_trimmed_structure,peakind,borderflow,map_hourmonth,map_hourday,first_hour,last_hour,step_hour;

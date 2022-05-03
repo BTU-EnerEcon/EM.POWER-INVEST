@@ -17,24 +17,24 @@ GEN_CONV(country_all,conv,year_all,hour_all)         Generation of conventional 
 GEN_CONV_FULL(country_all,conv,year_all,hour_all)    Generation of conventional technologies at full capacity
 GEN_CONV_MIN(country_all,conv,year_all,hour_all)     Generation of conventional technologies at full minimum capacity
 
-CAP_CONV_RTO(country_all,conv,year_all,hour_all)     Capacity ready-to-operate of conventional technologies
-CAP_CONV_UP(country_all,conv,year_all,hour_all)      Startup capacity of conventional technologies
-CAP_CONV_DOWN(country_all,conv,year_all,hour_all)    Shutdown capacity of conventional technologies
+CAP_CONV_RTO(country_all,conv,year_all,hour_all)         Capacity ready-to-operate of conventional technologies
+CAP_CONV_UP(country_all,conv,year_all,hour_all)          Startup capacity of conventional technologies
+CAP_CONV_DOWN(country_all,conv,year_all,hour_all)        Shutdown capacity of conventional technologies
 
-CAP_CONV_ADD(country_all,conv,year_all)                 Capacity investment in conventional technologies
-CAP_CONV_SUB(country_all,conv,year_all)                 Capacity divestment in conventional technologies
-CAP_CONV_INSTALL(country_all,conv,year_all)             Installed capacity in year of conventional technology
+CAP_CONV_ADD(country_all,conv,year_all)                  Capacity investment in conventional technologies
+CAP_CONV_SUB(country_all,conv,year_all)                  Capacity divestment in conventional technologies
+CAP_CONV_INSTALL(country_all,conv,year_all)              Installed capacity in year of conventional technology
 
-GEN_RENEW(country_all,renew,year_all,hour_all)   Generation of renewable technologies
+GEN_RENEW(country_all,renew,year_all,hour_all)           Generation of renewable technologies
 
-CURT_RENEW(country_all,renew,year_all,hour_all)  Renewable curtailment
-CURT_LOAD(country_all,year_all,hour_all)             Load curtailment
+CURT_RENEW(country_all,renew,year_all,hour_all)          Renewable curtailment
+CURT_LOAD(country_all,year_all,hour_all)                 Load curtailment
 
-LEVEL(country_all,stor,year_all,hour_all)            Energy level of the storage
-CHARGE(country_all,stor,year_all,hour_all)           Charge the storage
-DISCHARGE(country_all,stor,year_all,hour_all)        Discharge the storage
+LEVEL(country_all,stor,year_all,hour_all)                Energy level of the storage
+CHARGE(country_all,stor,year_all,hour_all)               Charge the storage
+DISCHARGE(country_all,stor,year_all,hour_all)            Discharge the storage
 
-FLOW(country_all,country_all,year_all,hour_all)      Export flow from A to B
+FLOW(country_all,country_all,year_all,hour_all)          Export flow from A to B
 
 ;
 
@@ -73,6 +73,9 @@ RES_FLOW_up                              Upper bound for FLOW (export congestion
 RES_CAP_CONV_ADD_up
 RES_CAP_CONV_NUCLEAR_up
 RES_CAP_HARDCOAL_DE_up
+
+DEF_COST_dispatch                        Definition of COST for pure dispatch problem
+DEF_CAP_CONV_INSTALL_dispatch            Definition of CAP_CONV_INSTALL for pure dispatch problem
 ;
 
 
@@ -371,7 +374,7 @@ DEF_LEVEL_start(country,stor,year,hour_all)$( hour(year,hour_all) AND ( ord(hour
 
          =E=
 
-         cap_stor_install_exogen(country,stor,year) * storageduration(stor) * 0.5
+         cap_stor_install_exogen(country,stor,year) * duration_stor(country,stor) * 0.5 * (sum(hour(year,hour_all2), 1) / 8760)
 
          +
 
@@ -389,7 +392,7 @@ DEF_LEVEL_end(country,stor,year,hour_all)$( hour(year,hour_all) AND ( ord(hour_a
 
          =E=
 
-         cap_stor_install_exogen(country,stor,year) * storageduration(stor) * 0.5
+         cap_stor_install_exogen(country,stor,year) * duration_stor(country,stor) * 0.5 * (sum(hour(year,hour_all2), 1) / 8760)
 
 ;
 
@@ -399,7 +402,7 @@ RES_LEVEL_up(country,stor,year,hour_all)$( hour(year,hour_all) AND (cap_stor_ins
 
          =L=
 
-         ( 1 - 0.5 * ( 1 - avail_stor(stor) ) ) * cap_stor_install_exogen(country,stor,year) * storageduration(stor)
+         ( 1 - 0.5 * ( 1 - avail_stor(stor) ) ) * cap_stor_install_exogen(country,stor,year) * duration_stor(country,stor) * (sum(hour(year,hour_all2), 1) / 8760)
 
 ;
 
@@ -409,7 +412,7 @@ RES_LEVEL_lo(country,stor,year,hour_all)$( hour(year,hour_all) AND (cap_stor_ins
 
          =G=
 
-         0.5 * ( 1 - avail_stor(stor) ) * cap_stor_install_exogen(country,stor,year) * storageduration(stor)
+         0.5 * ( 1 - avail_stor(stor) ) * cap_stor_install_exogen(country,stor,year) * duration_stor(country,stor) * (sum(hour(year,hour_all2), 1) / 8760)
 
 ;
 
@@ -429,7 +432,7 @@ RES_DISCHARGE_up(country,stor,year,hour_all)$(hour(year,hour_all) AND (cap_stor_
 
          =L=
 
-         avail_stor(stor) * cap_stor_install_exogen(country,stor,year)
+         avail_stor(stor) * cap_stor_install_exogen(country,stor,year) * discharge_to_charge_ratio_stor(country,stor)
 
 ;
 
@@ -456,6 +459,21 @@ RES_CAP_HARDCOAL_DE_up(year)$(indicator_coalphaseout eq 1)..
          =L=
 
          sum(conv$(map_convfuel(conv,'hardcoal')), cap_conv_install_old_phaseout('DE+LU',conv,year))
+;
+
+
+*###############################################
+*Additional equations for pure dispatch problem
+
+DEF_COST_dispatch..
+         COST =E= sum(year, money_weighting_factor(year) * COST_GEN(year) )
+;
+
+DEF_CAP_CONV_INSTALL_dispatch(country,conv,year)..
+         CAP_CONV_INSTALL(country,conv,year) =E=
+
+         cap_conv_install_L(country,conv,year)
+
 ;
 
 MODEL Investment
@@ -493,4 +511,35 @@ RES_FLOW_up
 RES_CAP_CONV_ADD_up
 RES_CAP_CONV_NUCLEAR_up
 RES_CAP_HARDCOAL_DE_up
+/;
+
+
+MODEL Dispatch
+/
+DEF_COST_dispatch
+DEF_COST_GEN
+MCC
+DEF_CAP_CONV_RTO
+RES_CAP_CONV_RTO_up
+DEF_GEN_CONV
+RES_GEN_CONV_up
+RES_GEN_CONV_MIN_lo
+RES_GEN_CONV_lo
+DEF_CAP_CONV_INSTALL_dispatch
+RES_GEN_RENEW_up
+RES_GEN_RENEW_lo
+RES_GEN_RENEW_yearly_potential
+RES_GEN_RENEW_monthly_potential
+RES_GEN_RENEW_reservoir_up
+RES_GEN_RENEW_reservoir_lo
+DEF_GEN_RENEW_curt
+DEF_GEN_RENEW_ncurt
+DEF_LEVEL
+DEF_LEVEL_start
+DEF_LEVEL_end
+RES_LEVEL_up
+RES_LEVEL_lo
+RES_CHARGE_up
+RES_DISCHARGE_up
+RES_FLOW_up
 /;
