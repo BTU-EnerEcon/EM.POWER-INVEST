@@ -32,7 +32,7 @@ Development of coal capacity in Germany when coal phase-out restriction is appli
 How to run EM.POWER-INVEST?
 ===============================
 
-For the operation of EM.POWER INVEST, it is essential to have a GAMS license which offers full access to the CPLEX solver. The model solving is achieved by executing three files: the initial file named “Firstrun” must be computed to have all the required sets and parameters defined; the computation is followed by running the GAMS script “Representative_hours”, which includes the time reduction approach for the first model stage explained in our Working Paper; the file called “main_3stage_h4380” includes the core model solving for our three step model approach and displays the output in bihourly resolution subsequent to its full computation. Results can also be obtained in hourly resolution, if “main_3stage_h8760” is executed.
+For the operation of EM.POWER INVEST, it is essential to have a GAMS license which offers full access to the CPLEX solver. The model solving is achieved by executing three files: the initial file named “Firstrun” must be computed to have all the required sets and parameters defined; the computation is followed by running the GAMS script “RepresentativeHours_Every25hour_2ExtremeDays”, which includes the time reduction approach for the first model stage explained in our Working Paper: https://dx.doi.org/10.2139/ssrn.4095937; third step consists of running the file "Determine_MonthlyAvailabilityStructure"; the file called “main_3stage_h4380” includes the core model solving for our three step model approach and displays the output in bihourly resolution subsequent to its full computation. Results can also be obtained in hourly resolution, if “main_3stage_h8760” is executed.
 
 
 Licence
